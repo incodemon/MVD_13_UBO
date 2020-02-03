@@ -151,13 +151,49 @@ void GraphicsSystem::setMaterialUniforms() {
     
 	//temporary stuff for UBO_test
 
-	GLint u_color_a = glGetUniformLocation(shader_->program, "u_test_struct.color_a"); 
-	if (u_color_a != -1) glUniform3f(u_color_a, 1.0, 0.0, 1.0);
+	//GLint u_color_a = glGetUniformLocation(shader_->program, "u_test_struct.color_a"); 
+	//if (u_color_a != -1) glUniform3f(u_color_a, 1.0, 0.0, 1.0);
 
-	GLint u_color_b = glGetUniformLocation(shader_->program, "u_test_struct.color_b");
-	if (u_color_b != -1) glUniform3f(u_color_b, 0.0, 1.0, 0.0);
+	//GLint u_color_b = glGetUniformLocation(shader_->program, "u_test_struct.color_b");
+	//if (u_color_b != -1) glUniform3f(u_color_b, 0.0, 1.0, 0.0);
 
+	//declare size
+	GLsizeiptr size_test_ubo = 16 + 16; //2 * vec4 (declared in shader)
 	
+	//create our UBO
+	GLuint uboTest;
+	glGenBuffers(1, &uboTest);
+	glBindBuffer(GL_UNIFORM_BUFFER,uboTest);
+	glBufferData(GL_UNIFORM_BUFFER, size_test_ubo,NULL,GL_STATIC_DRAW);
+
+	//fill our ubo
+	//declare a "running counter" of where are in our memory
+	GLintptr offset = 0;
+
+	GLfloat color_a_data[4] = { 1.0f , 0.0f , 1.0f , 0.0f }; //the color green
+	glBufferSubData(GL_UNIFORM_BUFFER,
+					offset, //where to start writing memory in UBO
+					16, //Size of data
+					color_a_data); //array pointer
+
+	offset += 16;
+
+	GLfloat color_b_data[4] = { 0.0f , 1.0f , 0.0f , 0.0f }; //the color purple
+	glBufferSubData(GL_UNIFORM_BUFFER,
+		offset, //where to start writing memory in UBO
+		16, //Size of data
+		color_b_data); //array pointer
+	offset += 16; //I kow that i've never will use it again
+	GLuint TEST_BINDING_POINT = 0;
+	glBindBufferRange(GL_UNIFORM_BUFFER,  //the type of buffer
+						TEST_BINDING_POINT, //the index of binding point = 0
+						uboTest, //the buffer we want to bind
+						0,	 //starting offset
+						size_test_ubo); //size of whole buffer
+
+	GLuint UBO_test_handle = glGetUniformBlockIndex(shader_->program, "UBO_test");
+	if (UBO_test_handle != -1) glUniformBlockBinding(shader_->program,UBO_test_handle,TEST_BINDING_POINT);
+
     //material uniforms
 	shader_->setUniform(U_AMBIENT, mat.ambient);
 	shader_->setUniform(U_DIFFUSE, mat.diffuse);

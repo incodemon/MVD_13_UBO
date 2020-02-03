@@ -6,10 +6,14 @@ in vec3 v_normal;
 out vec4 fragColor;
 
 struct TestStruct {
-	vec3 color_a;
-	vec3 color_b;
+	vec4 color_a;
+	vec4 color_b;
 };
-uniform TestStruct u_test_struct;
+
+layout (std140) uniform UBO_test{
+	TestStruct u_test_struct;
+};
+
 
 
 void main(){
@@ -18,8 +22,7 @@ void main(){
 
 	float col_f = sin(v_normal.x);
 	
-	vec3 final_color = mix(u_test_struct.color_a, u_test_struct.color_b, col_f);
-
-
+	vec3 final_color = mix(u_test_struct.color_a.xyz, u_test_struct.color_b.xyz, col_f);
+	
 	fragColor = vec4(final_color, 1.0);
 }
